@@ -57,7 +57,10 @@ class A2dpCodecConfig {
             BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
     private @CodecPriority int mA2dpSourceCodecPriorityOpus =
             BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
-
+    private @CodecPriority int mA2dpSourceCodecPriorityLhdcV3 =
+            BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
+    private @CodecPriority int mA2dpSourceCodecPriorityLhdcV5 =
+            BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
     private BluetoothCodecConfig[] mCodecConfigOffloading = new BluetoothCodecConfig[0];
 
     A2dpCodecConfig(
@@ -297,9 +300,32 @@ class A2dpCodecConfig {
                 && (value < BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST)) {
             mA2dpSourceCodecPriorityOpus = value;
         }
+        try {
+            value = SystemProperties.getInt(
+                "bluetooth.a2dp.source.lhdcv3_priority.config",
+                resources.getInteger(R.integer.a2dp_source_codec_priority_lhdcv3));
+        } catch (NotFoundException e) {
+            value = BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
+        }
+        if ((value >= BluetoothCodecConfig.CODEC_PRIORITY_DISABLED) && (value
+                < BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST)) {
+            mA2dpSourceCodecPriorityLhdcV3 = value;
+        }
+
+        try {
+            value = SystemProperties.getInt(
+                "bluetooth.a2dp.source.lhdcv5_priority.config",
+                resources.getInteger(R.integer.a2dp_source_codec_priority_lhdcv5));
+        } catch (NotFoundException e) {
+            value = BluetoothCodecConfig.CODEC_PRIORITY_DEFAULT;
+        }
+        if ((value >= BluetoothCodecConfig.CODEC_PRIORITY_DISABLED) && (value
+                < BluetoothCodecConfig.CODEC_PRIORITY_HIGHEST)) {
+            mA2dpSourceCodecPriorityLhdcV5 = value;
+        }
 
         BluetoothCodecConfig codecConfig;
-        BluetoothCodecConfig[] codecConfigArray = new BluetoothCodecConfig[7];
+        BluetoothCodecConfig[] codecConfigArray = new BluetoothCodecConfig[9];  // Savitech LHDC patch
         codecConfig =
                 new BluetoothCodecConfig.Builder()
                         .setCodecType(BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC)
@@ -343,7 +369,16 @@ class A2dpCodecConfig {
                         .setCodecSpecific1(0x1337)
                         .build();
         codecConfigArray[6] = codecConfig;
-
+        codecConfig = new BluetoothCodecConfig.Builder()
+                .setCodecType(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LHDCV3)
+                .setCodecPriority(mA2dpSourceCodecPriorityLhdcV3)
+                .build();
+        codecConfigArray[7] = codecConfig;
+        codecConfig = new BluetoothCodecConfig.Builder()
+                .setCodecType(BluetoothCodecConfig.SOURCE_CODEC_TYPE_LHDCV5)
+                .setCodecPriority(mA2dpSourceCodecPriorityLhdcV5)
+                .build();
+        codecConfigArray[8] = codecConfig;
         return codecConfigArray;
     }
 
